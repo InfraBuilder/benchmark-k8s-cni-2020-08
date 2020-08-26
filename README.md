@@ -52,7 +52,7 @@ Values injected in the spreadsheet are in files `cni/<cni>.<distrib>-<kernel>.ts
 
 ### Raw results
 
-Raw results are available in this repository, just check the [cni](cni) directory for `*.knbdata` files. 
+Raw results are available in this repository, just check the [results](results) directory for `*.knbdata` files. 
 You can generate reports with [knb](https://github.com/InfraBuilder/k8s-bench-suite), for example :
 
 ```bash
