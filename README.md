@@ -35,7 +35,7 @@ EOF
 
 Example :
 
-![asciicast](https://asciinema.org/a/NXrptSXsjqEeYQn4Hg1R7gb5O.png)](https://asciinema.org/a/NXrptSXsjqEeYQn4Hg1R7gb5O)
+[![asciicast](https://asciinema.org/a/NXrptSXsjqEeYQn4Hg1R7gb5O.png)](https://asciinema.org/a/NXrptSXsjqEeYQn4Hg1R7gb5O)
 
 ## Results 
 
