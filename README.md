@@ -56,11 +56,11 @@ Raw results are available in this repository, just check the [cni](cni) director
 You can generate reports with [knb](https://github.com/InfraBuilder/k8s-bench-suite), for example :
 
 ```bash
-knb -fd cni/doc-antrea.u18.04.default.knbdata -o text
+knb -fd results/doc-antrea.u18.04-default-run1.knbdata -o text
 # or
-knb -fd cni/doc-antrea.u18.04.default.knbdata -o json
+knb -fd results/doc-antrea.u18.04-default-run1.knbdata -o json
 # or
-knb -fd cni/doc-antrea.u18.04.default.knbdata -o yaml
+knb -fd results/doc-antrea.u18.04-default-run1.knbdata -o yaml
 ```
 
 As `knbdata` files are just simple tar.gz archives, you can also uncompress the file to see raw containers logs (showing data even before being parsed by `knb`)
