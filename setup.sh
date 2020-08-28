@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBUG_LEVEL=2
+DEBUG_LEVEL=3
 
 [ "$(tput colors)" -gt 0 ] && COLOR="true" || COLOR="false"
 function color { 
@@ -87,10 +87,13 @@ function usage {
 cd $(dirname $0)
 
 DISTRIBUTION="bionic"
+KERNEL="default"
 RELEASE="false"
 CUSTOM_MTU="9000"
 
-WORKERS=""
+MASTER="s02"
+WORKERS="s03 s04"
+
 UNKNOWN_ARGLIST=""
 while [ "$1" != "" ]
 do
@@ -114,7 +117,7 @@ do
         --worker|-w)
 			shift
 			[ "$1" = "" ] && fatal "$arg flag must be followed by a value"
-			WORKERS="$WORKERS $(sed 's/,/ /g' <<< $1)"
+			WORKERS="$(sed 's/,/ /g' <<< $1)"
 			info "Worker nodes will be '$WORKERS'"
 			;;
 
@@ -176,6 +179,8 @@ $DEBUG && debug "Argument parsing done"
 
 [ "$MASTER" = "" ] && fatal "You must specify a master node with flag --master or -m"
 [ "$WORKERS" = "" ] && fatal "You must specify at least one worker node with flag --worker or -w"
+
+$DEBUG && debug "master and workers defined"
 NODES="$MASTER $WORKERS"
 
 if $RELEASE
@@ -187,6 +192,9 @@ then
     done
     exit
 fi
+
+
+$DEBUG && debug "CNI check"
 
 [ "$CNI_TO_SETUP" = "" ] && fatal "You must specify a CNI to setup with flag --cni or -c"
 case $CNI_TO_SETUP in
@@ -291,10 +299,6 @@ do
 	apt-get install -y kubelet kubeadm kubectl docker.io
 	swapoff -a
 	sed -i '/\sswap\s/d' /etc/fstab
-	
-    echo '{"registry-mirrors": ["http://10.1.1.1:5000"],"insecure-registries":["10.1.1.1:5000"]}' > /etc/docker/daemon.json
-    
-    systemctl restart docker
 
 	# Mounting eBPF FS
 	mount bpffs /sys/fs/bpf -t bpf
@@ -314,7 +318,7 @@ wait $PIDLIST
 info "Deploying master"
 
 KOPT=""
-[ -e "cni/$CNI_TO_SETUP.cidr" ] && KOPT="$KOPT --pod-network-cidr $(cat cni/$CNI_TO_SETUP.cidr)"
+[ -e "cni/$CNI_TO_SETUP.kopt" ] && KOPT="$(cat cni/$CNI_TO_SETUP.kopt)"
 [ "$KOPT" != "" ] && info "Using master option $KOPT"
 lssh $MASTER sudo kubeadm init $KOPT >/dev/null 2> /dev/null
 
@@ -348,11 +352,15 @@ fi
 info "Installing CNI $CNI_TO_SETUP"
 kubectl apply -f cni/$CNI_TO_SETUP.yml >/dev/null
 
-info "Waiting for nodes to be ready"
-while true
+info "Waiting for all nodes to be ready"
+for i in $NODES
 do
-	kubectl get nodes | grep "NotReady" >/dev/null || break
-	sleep 1
-done
+	info "  Waiting for node $i to be ready"
+	while true
+	do
 
+		kubectl get node $i | grep "NotReady" >/dev/null || break
+		sleep 1
+	done
+done
 info "Cluster is now ready with network CNI $CNI_TO_SETUP"
