@@ -363,4 +363,48 @@ do
 		sleep 1
 	done
 done
+
+info "Waiting for all deployments in kube-system to be ready"
+for i in $(kubectl -n kube-system get deploy --no-headers|awk '{print $1}')
+do
+	info "  Waiting for deployment $i to be fully ready"
+	while true
+	do
+		STATUS=$(kubectl -n kube-system get deploy $i --no-headers|awk '{print $2" "$3" "$4}'|tr "/" " ")
+		READY=$(awk '{print $1}' <<< $STATUS)
+		REPLICAS=$(awk '{print $2}' <<< $STATUS)
+		UP_TO_DATE=$(awk '{print $1}' <<< $STATUS)
+		AVAILABLE=$(awk '{print $1}' <<< $STATUS)
+
+		[ "$READY" = "$REPLICAS" ] && \
+			[ "$READY" = "$UP_TO_DATE" ] && \
+			[ "$READY" = "$AVAILABLE" ] && \
+			break
+		sleep 1
+	done
+done
+
+info "Waiting for all daemonsets in kube-system to be ready"
+for i in $(kubectl -n kube-system get ds --no-headers|awk '{print $1}')
+do
+	info "  Waiting for daemonsets $i to be ready"
+	while true
+	do
+		STATUS=$(kubectl -n kube-system get ds $i --no-headers|awk '{print $2" "$3" "$4" "$5" "$6}')
+		DESIRED=$(awk '{print $1}' <<< $STATUS)
+		CURRENT=$(awk '{print $2}' <<< $STATUS)
+		READY=$(awk '{print $3}' <<< $STATUS)
+		UP_TO_DATE=$(awk '{print $4}' <<< $STATUS)
+		AVAILABLE=$(awk '{print $5}' <<< $STATUS)
+
+		[ "$READY" = "$DESIRED" ] && \
+			[ "$READY" = "$CURRENT" ] && \
+			[ "$READY" = "$UP_TO_DATE" ] && \
+			[ "$READY" = "$AVAILABLE" ] && \
+			break
+
+		sleep 1
+	done
+done
+
 info "Cluster is now ready with network CNI $CNI_TO_SETUP"
