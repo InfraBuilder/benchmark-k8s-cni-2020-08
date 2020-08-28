@@ -28,7 +28,7 @@ DEBUG_LEVEL=2
 function logdate { date "+%Y-%m-%d %H:%M:%S"; }
 function fatal { echo "$(logdate) $(color red)[FATAL]$(color normal) $@" >&2; exit 1; }
 function err { echo "$(logdate) $(color lightred)[ERROR]$(color normal) $@" >&2; }
-function warn { [$DEBUG_LEVEL -ge 1 ] && echo "$(logdate) $(color yellow)[WARNING]$(color normal) $@" >&2; }
+function warn { [ $DEBUG_LEVEL -ge 1 ] && echo "$(logdate) $(color yellow)[WARNING]$(color normal) $@" >&2; }
 function info { [ $DEBUG_LEVEL -ge 2 ] && echo "$(logdate) $(color cyan)[INFO]$(color normal) $@" >&2; }
 function debug { [ $DEBUG_LEVEL -ge 3 ] && echo "$(logdate) $(color lightcyan)[DEBUG]$(color normal) $@" >&2; }
 
