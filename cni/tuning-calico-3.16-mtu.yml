@@ -3,7 +3,7 @@
 # Version : v3.16.0
 # Date : 2020-08-28
 # Tuning :
-#  MTU (line 25)
+# - MTU manually set to 8940
 ---
 # Source: calico/templates/calico-config.yaml
 # This ConfigMap is used to configure a self-hosted Calico installation.
