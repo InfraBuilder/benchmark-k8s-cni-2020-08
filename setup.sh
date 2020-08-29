@@ -315,6 +315,8 @@ wait $PIDLIST
 
 #===[ K8S Master Setup ]=======================================================
 
+[ -e "./cni/$CNI_TO_SETUP.prek8s" ] && source "./cni/$CNI_TO_SETUP.prek8s"
+
 info "Deploying master"
 
 KOPT=""
@@ -341,6 +343,8 @@ done
 
 export KUBECONFIG="$(pwd)/kubeconfig"
 
+[ -e "./cni/$CNI_TO_SETUP.postk8s" ] && source "./cni/$CNI_TO_SETUP.postk8s"
+
 #===[ CNI Setup ]==============================================================
 
 if [ "$CNI_TO_SETUP" = "nocni" ] 
@@ -348,6 +352,8 @@ then
     info "Cluster is ready with no CNI"
     exit 0
 fi
+
+[ -e "./cni/$CNI_TO_SETUP.precni" ] && source "./cni/$CNI_TO_SETUP.precni"
 
 info "Installing CNI $CNI_TO_SETUP"
 kubectl apply -f cni/$CNI_TO_SETUP.yml >/dev/null
@@ -406,5 +412,7 @@ do
 		sleep 1
 	done
 done
+
+[ -e "./cni/$CNI_TO_SETUP.postcni" ] && source "./cni/$CNI_TO_SETUP.postcni"
 
 info "Cluster is now ready with network CNI $CNI_TO_SETUP"
