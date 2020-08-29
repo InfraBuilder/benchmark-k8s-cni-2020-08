@@ -6,22 +6,15 @@ The benchmark is based on `knb` from the [k8s-bench-suite](https://github.com/In
 
 ## Benchmark protocol
 
-The benchmark is conducted on three Supermicro bare-metal servers connected through a Supermicro 10Gbit switch. 
-The servers are directly connected to the switch via DAC SFP+ passive cables and are set up in the same VLAN with jumbo frames activated (MTU 9000).
-
-Kubernetes 1.19.0 is deployed via `kubeadm` on Ubuntu 18.04 and 20.40. Docker is setup with a standard `apt install docker.io` (so it will be version `` on 18.04, and `` on 20.04).
-
-To improve reproducibility, we have chosen to always set up the master on the first node, to host the server part of the benchmark on the second server, and the client part on the third one. This is achieved via NodeSelector in Kubernetes deployments. 
-
-The whole cluster is tear down and completely re-deployed between each CNI. Each CNI is tested 3 times, we retain the mean value.
-
-The first round is made of "Out of documentation" CNI configuration. This would
+See [PROTOCOL.md](PROTOCOL.md)
 
 ## CNI selection
 
 The CNI that are tested in this benchmark must be deployed with a "one yaml file" method. All CNIs yaml file used are present in the [cni](cni) directory. If a CNI need options to kubeadm init, like set the `--pod-network-cidr` for example, a file `{cni}.kopt` will contain the options used during the test.
 
 ## Run example
+
+Please note that [benchmark.sh](benchmark.sh) uses [setup.sh](setup.sh), the node deployment script that is tailored for our MaaS-based lab environment. 
 
 All benchmark runs are recorded in [Asciinema](https://asciinema.org/) :
 
