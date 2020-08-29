@@ -1,10 +1,9 @@
-# Doc : https://antrea.io/docs/master/getting-started/
-# Source : https://github.com/vmware-tanzu/antrea/releases/download/v0.9.1/antrea.yml
+# Doc : https://antrea.io/docs/master/ipsec-tunnel/
+# Source : https://github.com/vmware-tanzu/antrea/releases/download/v0.9.1/antrea-ipsec.yml
 # Version : v0.9.1
-# Date : 2020-08-25
+# Date : 2020-08-29
 # Tuning :
-# - Enable GRE encapsulation (mandatory for IPsec)
-# - Enable IPsec encryption
+# - Changing the IPsec PSK in secret antrea-ipsec
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -808,8 +807,17 @@ metadata:
   annotations: {}
   labels:
     app: antrea
-  name: antrea-config-fg74hdgb78
+  name: antrea-config-92kk9hc82g
   namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: antrea-ipsec
+  namespace: kube-system
+stringData:
+  psk: infrabuilder
+type: Opaque
 ---
 apiVersion: v1
 kind: Service
@@ -913,7 +921,7 @@ spec:
         key: node-role.kubernetes.io/master
       volumes:
       - configMap:
-          name: antrea-config-fg74hdgb78
+          name: antrea-config-92kk9hc82g
         name: antrea-config
       - name: antrea-controller-tls
         secret:
@@ -986,6 +994,11 @@ spec:
         command:
         - antrea-agent
         env:
+        - name: ANTREA_IPSEC_PSK
+          valueFrom:
+            secretKeyRef:
+              key: psk
+              name: antrea-ipsec
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -1053,6 +1066,35 @@ spec:
           readOnly: true
         - mountPath: /run/xtables.lock
           name: xtables-lock
+      - command:
+        - start_ovs_ipsec
+        image: antrea/antrea-ubuntu:v0.9.1
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - timeout 5 container_liveness_probe ovs-ipsec
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        name: antrea-ipsec
+        resources:
+          requests:
+            cpu: 50m
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - mountPath: /var/run/openvswitch
+          name: host-var-run-antrea
+          subPath: openvswitch
+        - mountPath: /var/log/openvswitch
+          name: host-var-log-antrea
+          subPath: openvswitch
+        - mountPath: /var/log/strongswan
+          name: host-var-log-antrea
+          subPath: strongswan
       - command:
         - start_ovs
         image: antrea/antrea-ubuntu:v0.9.1
@@ -1125,7 +1167,7 @@ spec:
         operator: Exists
       volumes:
       - configMap:
-          name: antrea-config-fg74hdgb78
+          name: antrea-config-92kk9hc82g
         name: antrea-config
       - hostPath:
           path: /etc/cni/net.d
