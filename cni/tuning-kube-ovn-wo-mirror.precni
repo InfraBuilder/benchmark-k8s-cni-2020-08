@@ -1,0 +1,3 @@
+
+info "Applying label kube-ovn/role=master to node s02"
+kubectl label node s02 kube-ovn/role=master >/dev/null
