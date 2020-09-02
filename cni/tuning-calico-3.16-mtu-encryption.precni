@@ -1,0 +1,5 @@
+info "Setup wireguard on all nodes"
+for i in $NODES
+do
+    lssh $i sudo sudo apt install wireguard -y
+done
