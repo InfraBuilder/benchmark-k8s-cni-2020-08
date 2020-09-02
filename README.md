@@ -23,7 +23,6 @@ export KERNEL=default
 export DISTRIBUTION=18.04
 export CNI=doc-antrea
 asciinema rec results/$CNI.u$DISTRIBUTION-$KERNEL/$CNI.u$DISTRIBUTION-$KERNEL.cast -i 3 -c "./benchmark.sh"
-EOF
 ```
 
 Example :
