@@ -1,0 +1,3 @@
+info "Creating encryption password"
+kubectl create secret -n kube-system generic weave-passwd \
+    --from-literal=weave-passwd=s3cr3tp4ssw0rd > /dev/null
