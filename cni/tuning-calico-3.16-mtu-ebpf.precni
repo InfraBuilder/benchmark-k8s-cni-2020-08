@@ -1,0 +1,16 @@
+
+
+info "Forcing kubernetes-services-endpoint via ConfigMap"
+kubectl apply -f - <<EOF
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kubernetes-services-endpoint
+  namespace: kube-system
+data:
+  KUBERNETES_SERVICE_HOST: "10.1.1.2"
+  KUBERNETES_SERVICE_PORT: "6443"
+EOF
+
+info "Waiting for kubelet to pick up the ConfigMap "
+sleep 60
