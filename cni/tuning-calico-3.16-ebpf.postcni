@@ -1,0 +1,24 @@
+
+info "Disabling kube-proxy"
+kubectl patch ds -n kube-system kube-proxy -p '{"spec":{"template":{"spec":{"nodeSelector":{"non-calico": "true"}}}}}'
+
+
+info "Deploy calicoctl pod"
+kubectl apply -f https://docs.projectcalico.org/manifests/calicoctl.yaml
+
+
+info "Waiting for pod calicoctl to be ready"
+while true
+do
+    STATUS=$(kubectl -n kube-system get pod calicoctl --no-headers|awk '{print $2}'|tr "/" " ")
+    READY=$(awk '{print $1}' <<< $STATUS)
+    CONTAINERS=$(awk '{print $2}' <<< $STATUS)
+    
+    [ "$READY" = "$CONTAINERS" ] && break
+    sleep 1
+done
+
+
+info "Enabling Calico eBPF"
+kubectl exec -ti -n kube-system calicoctl -- \
+    calicoctl patch felixconfiguration default --patch='{"spec": {"bpfEnabled": true}}'
